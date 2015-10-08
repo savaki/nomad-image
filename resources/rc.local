@@ -2,9 +2,12 @@
 
 export LOCAL_IPV4=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
 export AWS_INSTANCE_ID=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
-export AWS_TAGS=$(aws ec2 describe-instances --instance-ids ${AWS_INSTANCE_ID} | jq '.Reservations[0].Instances[0].Tags[]')
 export AWS_AVAILABILITY_ZONE=$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone)
 export AWS_REGION=$(echo ${AWS_AVAILABILITY_ZONE} | sed 's/[a-z]$//')
+
+# use awscli to find tags associated with instance
+export AWS_DEFAULT_REGION=${AWS_REGION}
+export AWS_TAGS=$(aws ec2 describe-instances --instance-ids ${AWS_INSTANCE_ID} | jq '.Reservations[0].Instances[0].Tags[]')
 
 export TAG_ROLE=$(echo ${AWS_TAGS} | jq -r 'select(.Key == "nomad-role") | .Value')
 export TAG_REGION=$(echo ${AWS_TAGS} | jq -r 'select(.Key == "nomad-region") | .Value')
